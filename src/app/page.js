@@ -1,113 +1,187 @@
-import Image from 'next/image'
+"use client";
+
+import React, { useState } from 'react';
 
 export default function Home() {
+  const [items, setItems] = useState([]);
+  const [newItem, setNewItem] = useState({ value: '', weight: '' });
+  const [result, setResult] = useState(null);
+  const [totalWeight, setTotalWeight] = useState(null);
+  const [enteredWeight, setEnteredWeight] = useState('');
+  const [listofIndexes, setListofIndexes] = useState([]);
+
+
+  const handleAddItem = () => {
+    setItems([...items, newItem]);
+    setNewItem({ value: '', weight: '' });
+  };
+
+  const handleInputChange = (key, value) => {
+    setNewItem((prevItem) => ({ ...prevItem, [key]: value }));
+  };
+
+//   const handleAddWeight = ()=> {
+//     setWeight(newWeight)
+
+//   }
+//  const handleWeightChange = (value)=> {
+//   setNewWeight(value)
+//   }
+const handleAddWeight = () => {
+  if (isPositiveInteger(enteredWeight)) {
+    setEnteredWeight(enteredWeight);
+  }
+  setTotalWeight("Knapsack maximum weight " + enteredWeight);
+  // console.log();
+
+};
+  const isPositiveInteger = (value) => {
+    return /^\d$/.test(value) && parseInt(value) > 0;
+  };
+
+  const handleCalculate = () => {
+    function max(a, b) 
+    { 
+          return (a > b) ? a : b; 
+    } 
+
+    console.log('Items:', items);
+    var N = items.length;
+    var W = parseInt(enteredWeight);
+    console.log(W);
+    console.log(N);
+    // items.map((item)=>{console.log(item);});
+    // console.log(items[0]);
+    
+    // console.log(items[N-1]);
+    // var P = new Array(N+1).map(() => new Array(W+1));
+    let P = new Array(N + 1);
+        for( let i=0;i<P.length;i++)
+        {
+            P[i]=new Array(W+1);
+            for(let j=0;j<W+1;j++)
+            {
+                P[i][j]=-1;
+            }
+        }
+  
+    // console.log(P);
+    for( let i = 0; i <= N; i++)
+    {
+      for (let j = 0; j <= W; j++) 
+      {
+        if (i == 0 || j == 0 ) {
+          P[i][j] = 0;
+        } else if (i > 0 && j < items[i-1].weight) {
+          P[i][j] = P[i - 1][j];
+        } else {
+          // console.log(parseInt(items[i-1].value));
+          P[i][j] = parseInt(max(P[i-1][j], P[i-1][j - parseInt(items[i-1].weight)] + parseInt(items[i-1].value)));
+          // console.log(P[i][j]);
+        }
+        
+      }
+    }
+    // console.log(P);
+    let listOfTakenItems = []
+    let i = N;
+    let j = W;
+    while (i > 0 && j > 0) {
+      if (P[i][j] == P[i-1][j]) { //element i not taken
+        i--;
+      } else { //element i taken, then move to case i-1, j - wi
+        listOfTakenItems.push(i);
+        console.log(i-1);
+        j = j - parseInt(items[i-1].weight);
+        i --;
+      }
+    }
+console.log(P[N][W]);
+    console.log(listOfTakenItems);
+    setListofIndexes(listOfTakenItems);
+    setResult('Maximum gain you can have : ' + P[N][W] + " And the items that you should take are : " + listOfTakenItems);
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
+    <div className="container mx-auto max-w-screen-md p-8">
+    <h1 className="text-3xl font-bold mb-4">Knapsack problem Using Dynamic Programing</h1>
+    <div className='flex flex-col'>
+    <p className="text-xl font-bold mb-4">Knapsack Maximum Weight : </p>
+    <div className="mb-4">
+        <label htmlFor="enteredWeight" className="mr-2 font-bold">
+          Enter Weight:
+        </label>
+        <input
+          type="text"
+          id="enteredWeight"
+          value={enteredWeight}
+          onChange={(e) => setEnteredWeight(e.target.value)}
+          className="p-2 border border-gray-300 rounded"
+        />
+        <button onClick={handleAddWeight} className="bg-blue-500 text-white px-4 py-2 rounded ml-2">
+          Add Weight
+        </button>
+        {/* {enteredWeight && (
+          <div className="mt-2">
+            Entered Weight: {enteredWeight} <span>(Click 'Add Weight' to confirm)</span>
+          </div>
+        )} */}
+        {/* {totalWeight && <p className="mt-4">Maximum knapsack weight: {enteredWeight}</p>} */}
+        {totalWeight && <p className="mt-4">{totalWeight}</p>}
+      </div>
+    </div>
+
+      <p className="text-xl font-bold mb-4">List of Items</p>
+      <div>
+        
+        {items.map((item, index) => (
+          <div key={index}
+          className={`flex items-center space-x-4 mb-4 ${listofIndexes.includes(index+1) ? 'bg-yellow-200' : ''}`}
+           >
+            <div className="text-xl font-bold mr-2">{index + 1}.</div>
+            <input
+              type="text"
+              value={item.value}
+              readOnly
+              className="p-2 border border-gray-300 rounded"
             />
-          </a>
+            <input
+              type="text"
+              value={item.weight}
+              readOnly
+              className="p-2 border border-gray-300 rounded"
+            />
+          </div>
+        ))}
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="text-xl font-bold mr-2">{items.length + 1}.</div>
+          <input
+            type="text"
+            placeholder="Value"
+            value={newItem.value}
+            onChange={(e) =>  handleInputChange('value', e.target.value)}
+            className="p-2 border border-gray-300 rounded"
+          />
+          <input
+            type="text"
+            placeholder="Weight"
+            value={newItem.weight}
+            onChange={(e) => handleInputChange('weight', e.target.value)}
+            className="p-2 border border-gray-300 rounded"
+          />
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+      <button
+        onClick={handleAddItem}
+        className="bg-green-500 text-white px-4 py-2 rounded"
+        // disabled={!isPositiveInteger(newItem.value) || !isPositiveInteger(newItem.weight)}
+      >
+        Add Item
+      </button>
+      <button onClick={handleCalculate} className="bg-blue-500 text-white px-4 py-2 rounded ml-4">
+        Calculate
+      </button>
+      {result && <p className="mt-4 font-bold text-2xl ">Result: {result}</p>}
+    </div>
+  );
 }
