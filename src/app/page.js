@@ -99,7 +99,12 @@ const handleAddWeight = () => {
 console.log(P[N][W]);
     console.log(listOfTakenItems);
     setListofIndexes(listOfTakenItems);
+    if (P[N][W] > 0 ) {
     setResult('Maximum gain you can have : ' + P[N][W] + " And the items that you should take are : " + listOfTakenItems);
+      
+    } else {
+      setResult('Maximum gain you can have : 0, and you can take any item');
+    }
   };
 
   return (
